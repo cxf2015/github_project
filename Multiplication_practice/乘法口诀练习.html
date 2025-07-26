@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乘法口诀练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        /* 题目数量选择器样式 */
+        .settings {
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .settings-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .question-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .selector-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .question-count-select {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .question-count-select:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .question-count-select:hover {
+            border-color: #007AFF;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .correct {
+            color: #34C759;
+        }
+
+        .wrong {
+            color: #FF3B30;
+        }
+
+        .total {
+            color: #007AFF;
+        }
+
+        .question {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 15px;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #E5E5E7;
+            border-radius: 15px;
+            background: white;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056CC;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #F2F2F7;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #E5E5EA;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #FF3B30;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background: #D70015;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.correct {
+            background: rgba(52, 199, 89, 0.1);
+            color: #34C759;
+        }
+
+        .feedback.wrong {
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+        }
+
+        .accuracy {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 完成状态样式 */
+        .completed {
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px solid #34C759;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .completed-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #34C759;
+            margin-bottom: 10px;
+        }
+
+        .completed-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 奖励彩蛋样式 */
+        .reward-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .reward-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .reward-card {
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%);
+            border-radius: 30px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .reward-overlay.show .reward-card {
+            transform: scale(1);
+        }
+
+        .reward-emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        .reward-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .reward-subtitle {
+            font-size: 1.3rem;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .reward-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .reward-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reward-btn:hover {
+            background: #0056CC;
+            transform: translateY(-2px);
+        }
+
+        /* 庆祝动画 */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        .confetti:nth-child(odd) {
+            background: #FF69B4;
+            animation-delay: 0.5s;
+        }
+
+        .confetti:nth-child(3n) {
+            background: #00CED1;
+            animation-delay: 1s;
+        }
+
+        .confetti:nth-child(4n) {
+            background: #FF6347;
+            animation-delay: 1.5s;
+        }
+
+        .confetti:nth-child(5n) {
+            background: #9370DB;
+            animation-delay: 2s;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0px);
+            }
+            100% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E5E5EA;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34C759, #30D158);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .question {
+                font-size: 1.5rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .stat-item {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .reward-card {
+                padding: 40px 30px;
+            }
+
+            .reward-title {
+                font-size: 2rem;
+            }
+
+            .reward-emoji {
+                font-size: 4rem;
+            }
+
+            .question-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .question-count-select {
+                min-width: 100%;
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 20%, 40%, 60%, 80% {
+                transform: translateX(-5px);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(5px);
+            }
+        }
+
+        .pulse {
+            animation: pulse 0.3s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .celebration {
+            animation: celebration 1s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+            75% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 嘟嘟-乘法口诀练习</h1>
+        
+        <!-- 题目数量设置 -->
+        <div class="settings">
+            <div class="settings-title">📝 设置练习目标</div>
+            <div class="question-selector">
+                <label class="selector-label">练习题目数量：</label>
+                <select class="question-count-select" id="questionCountSelect" onchange="updateQuestionCount()">
+                    <option value="10">10 道题</option>
+                    <option value="15">15 道题</option>
+                    <option value="20">20 道题</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number correct" id="correctCount">0</div>
+                <div class="stat-label">答对</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number wrong" id="wrongCount">0</div>
+                <div class="stat-label">答错</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number total" id="totalCount">0</div>
+                <div class="stat-label" id="totalLabel">总题数</div>
+            </div>
+        </div>
+
+        <div class="accuracy" id="accuracy">准确率: 0%</div>
+
+        <!-- 进度条 -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">选择题目数量后开始练习！</div>
+
+        <div class="question" id="question">点击"新题目"开始练习</div>
+
+        <div class="input-group">
+            <input 
+                type="number" 
+                id="answerInput" 
+                class="answer-input" 
+                placeholder="输入答案" 
+                disabled
+            >
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" id="submitBtn" onclick="checkAnswer()" disabled>
+                提交答案
+            </button>
+            <button class="btn btn-secondary" id="newQuestionBtn" onclick="generateQuestion()">
+                新题目
+            </button>
+        </div>
+
+        <button class="btn btn-reset" id="resetBtn" onclick="resetGame()" style="width: 100%;">
+            重新开始
+        </button>
+
+        <div class="feedback" id="feedback"></div>
+        
+        <!-- 完成状态显示 -->
+        <div class="completed" id="completedSection" style="display: none;">
+            <div class="completed-title">🎉 恭喜完成所有题目！</div>
+            <div class="completed-message" id="completedMessage"></div>
+        </div>
+    </div>
+
+    <!-- 奖励彩蛋弹窗 -->
+    <div class="reward-overlay" id="rewardOverlay">
+        <div class="reward-card">
+            <div class="reward-emoji" id="rewardEmoji">🎉</div>
+            <div class="reward-title" id="rewardTitle">嘟嘟 太棒了！</div>
+            <div class="reward-subtitle" id="rewardSubtitle">你已经连续答对5道题了！</div>
+            <div class="reward-message" id="rewardMessage">你真是个数学小天才！<br>继续加油，你一定能做得更好！</div>
+            <button class="reward-btn" onclick="closeReward()">继续挑战！</button>
+        </div>
+    </div>
+
+    <script>
+        let currentNum1, currentNum2, correctAnswer;
+        let correctCount = 0, wrongCount = 0, totalCount = 0;
+        let isAnswered = false;
+        let consecutiveCorrect = 0; // 连续答对的题目数
+        let targetQuestionCount = 10; // 目标题目数量
+        let isGameCompleted = false; // 游戏是否完成
+
+        // 奖励配置
+        const rewards = [
+            {
+                threshold: 5,
+                emoji: '🎉',
+                title: '嘟嘟 太棒了！ 闯了第一关',
+                subtitle: '连续答对5道题！',
+                message: '你真是个数学小天才！<br>继续加油，你一定能做得更好！'
+            },
+            {
+                threshold: 10,
+                emoji: '⭐',
+                title: '嘟嘟 超级棒！完成了第二关',
+                subtitle: '连续答对10道题！',
+                message: '哇！你的进步太快了！<br>你已经是乘法口诀大师了！'
+            },
+            {
+                threshold: 15,
+                emoji: '👑',
+                title: '嘟嘟 无敌了！完成15题了',
+                subtitle: '连续答对15道题！',
+                message: '简直不敢相信！<br>你就是真正的数学王者！'
+            },
+            {
+                threshold: 20,
+                emoji: '🏆',
+                title: '嘟嘟 超级努力！',
+                subtitle: '连续答对20道题！',
+                message: '你创造了奇迹！<br>没有什么能难倒你了！'
+            }
+        ];
+
+        function updateQuestionCount() {
+            targetQuestionCount = parseInt(document.getElementById('questionCountSelect').value);
+            updateProgress();
+            document.getElementById('totalLabel').textContent = `总题数 / ${targetQuestionCount}`;
+        }
+
+        function generateQuestion() {
+            if (isGameCompleted) return;
+            
+            // 生成1-9的随机数
+            currentNum1 = Math.floor(Math.random() * 9) + 1;
+            currentNum2 = Math.floor(Math.random() * 9) + 1;
+            correctAnswer = currentNum1 * currentNum2;
+            
+            document.getElementById('question').textContent = `${currentNum1} × ${currentNum2} = ?`;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('answerInput').focus();
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('completedSection').style.display = 'none';
+            
+            isAnswered = false;
+        }
+
+        function checkAnswer() {
+            if (isAnswered || isGameCompleted) return;
+            
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            const feedbackEl = document.getElementById('feedback');
+            
+            if (isNaN(userAnswer)) {
+                feedbackEl.textContent = '请输入一个有效的数字！';
+                feedbackEl.className = 'feedback wrong show';
+                document.querySelector('.answer-input').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.answer-input').classList.remove('shake');
+                }, 500);
+                return;
+            }
+            
+            totalCount++;
+            isAnswered = true;
+            
+            if (userAnswer === correctAnswer) {
+                correctCount++;
+                consecutiveCorrect++;
+                
+                feedbackEl.textContent = '🎉 回答正确！';
+                feedbackEl.className = 'feedback correct show';
+                document.querySelector('.question').classList.add('pulse');
+                
+                // 检查是否达到奖励阈值
+                checkReward();
+            } else {
+                wrongCount++;
+                consecutiveCorrect = 0; // 重置连续答对计数
+                
+                feedbackEl.textContent = `❌ 回答错误！正确答案是 ${correctAnswer}`;
+                feedbackEl.className = 'feedback wrong show';
+                document.querySelector('.answer-input').classList.add('shake');
+            }
+            
+            // 清除动画类
+            setTimeout(() => {
+                document.querySelector('.question').classList.remove('pulse');
+                document.querySelector('.answer-input').classList.remove('shake');
+            }, 500);
+            
+            updateStats();
+            updateProgress();
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            
+            // 检查是否完成所有题目
+            if (totalCount >= targetQuestionCount) {
+                showGameCompleted();
+                return;
+            }
+            
+            // 3秒后自动生成新题目
+            setTimeout(() => {
+                if (isAnswered && !isGameCompleted) {
+                    generateQuestion();
+                }
+            }, 2000);
+        }
+
+        function updateStats() {
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('wrongCount').textContent = wrongCount;
+            document.getElementById('totalCount').textContent = totalCount;
+            
+            const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            document.getElementById('accuracy').textContent = `准确率: ${accuracy}%`;
+        }
+
+        function updateProgress() {
+            if (isGameCompleted) {
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = '🎉 已完成所有题目！';
+                return;
+            }
+            
+            const progress = (totalCount / targetQuestionCount) * 100;
+            const remaining = targetQuestionCount - totalCount;
+            
+            document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
+            
+            if (remaining > 0) {
+                document.getElementById('progressText').textContent = `还需要完成 ${remaining} 道题！`;
+            } else {
+                document.getElementById('progressText').textContent = '🎉 已完成所有题目！';
+            }
+        }
+
+        function showGameCompleted() {
+            isGameCompleted = true;
+            const accuracy = Math.round((correctCount / totalCount) * 100);
+            let message = `你完成了 ${targetQuestionCount} 道题目！<br>`;
+            message += `答对 ${correctCount} 题，答错 ${wrongCount} 题<br>`;
+            message += `准确率：${accuracy}%<br><br>`;
+            
+            if (accuracy >= 90) {
+                message += '🏆 表现优秀！你是真正的数学小天才！';
+            } else if (accuracy >= 80) {
+                message += '⭐ 表现良好！继续努力会更棒！';
+            } else if (accuracy >= 60) {
+                message += '👍 及格了！多练习会进步更快！';
+            } else {
+                message += '💪 加油！多练习几遍就会熟练了！';
+            }
+            
+            document.getElementById('completedMessage').innerHTML = message;
+            document.getElementById('completedSection').style.display = 'block';
+            
+            // 隐藏题目和输入框
+            document.getElementById('question').style.display = 'none';
+            document.querySelector('.input-group').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('newQuestionBtn').style.display = 'none';
+        }
+
+        function resetGame() {
+            correctCount = 0;
+            wrongCount = 0;
+            totalCount = 0;
+            consecutiveCorrect = 0;
+            isAnswered = false;
+            isGameCompleted = false;
+            
+            // 重置显示
+            document.getElementById('question').style.display = 'block';
+            document.querySelector('.input-group').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('newQuestionBtn').style.display = 'inline-block';
+            document.getElementById('completedSection').style.display = 'none';
+            document.getElementById('question').textContent = '点击"新题目"开始练习';
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('feedback').classList.remove('show');
+            
+            updateStats();
+            updateProgress();
+        }
+
+        function getNextReward() {
+            for (let reward of rewards) {
+                if (consecutiveCorrect < reward.threshold) {
+                    return reward;
+                }
+            }
+            return null;
+        }
+
+        function checkReward() {
+            const reward = rewards.find(r => r.threshold === consecutiveCorrect);
+            if (reward) {
+                setTimeout(() => {
+                    showReward(reward);
+                }, 1000);
+            }
+        }
+
+        function showReward(reward) {
+            document.getElementById('rewardEmoji').textContent = reward.emoji;
+            document.getElementById('rewardTitle').textContent = reward.title;
+            document.getElementById('rewardSubtitle').textContent = reward.subtitle;
+            document.getElementById('rewardMessage').innerHTML = reward.message;
+            
+            document.getElementById('rewardOverlay').classList.add('show');
+            createConfetti();
+            
+            // 添加庆祝音效（如果需要的话）
+            document.querySelector('.container').classList.add('celebration');
+            setTimeout(() => {
+                document.querySelector('.container').classList.remove('celebration');
+            }, 1000);
+        }
+
+        function closeReward() {
+            document.getElementById('rewardOverlay').classList.remove('show');
+            removeConfetti();
+            
+            // 继续生成新题目
+            setTimeout(() => {
+                if (!isGameCompleted) {
+                    generateQuestion();
+                }
+            }, 500);
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                document.body.appendChild(confetti);
+                
+                // 3秒后自动移除
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+
+        function removeConfetti() {
+            const confettis = document.querySelectorAll('.confetti');
+            confettis.forEach(confetti => {
+                if (confetti.parentNode) {
+                    confetti.parentNode.removeChild(confetti);
+                }
+            });
+        }
+
+        // 回车键提交答案
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                checkAnswer();
+            }
+        });
+
+        // 阻止输入负数
+        document.getElementById('answerInput').addEventListener('input', function(e) {
+            if (e.target.value < 0) {
+                e.target.value = '';
+            }
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            updateProgress();
+            updateQuestionCount();
+        });
+    </script>
+</body>
+</html>
