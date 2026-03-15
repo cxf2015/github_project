@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Logger - 论文阅读记录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 侧边栏 - 论文列表 */
+        .sidebar {
+            width: 300px;
+            background-color: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .add-paper-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .add-paper-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .paper-list {
+            list-style: none;
+        }
+
+        .paper-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #34495e;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .paper-item:hover {
+            background-color: #3d566e;
+            transform: translateX(5px);
+        }
+
+        .paper-item.active {
+            background-color: #3498db;
+        }
+
+        .paper-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .paper-meta {
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* PDF 阅读器区域 */
+        .pdf-container {
+            flex: 1;
+            background-color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-toolbar {
+            padding: 10px 20px;
+            background-color: #34495e;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pdf-toolbar input[type="file"] {
+            display: none;
+        }
+
+        .toolbar-btn {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .toolbar-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #pdf-viewer {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        /* 笔记区域 */
+        .notes-container {
+            width: 400px;
+            background-color: white;
+            border-left: 1px solid #bdc3c7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notes-header {
+            padding: 20px;
+            background-color: #34495e;
+            color: white;
+        }
+
+        .notes-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .note-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .note-page {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .note-text {
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .note-actions {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .note-btn {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .add-note-section {
+            padding: 20px;
+            border-top: 1px solid #bdc3c7;
+            background-color: #f8f9fa;
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .save-note-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .save-note-btn:hover {
+            background-color: #229954;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <h2>📚 Paper Logger</h2>
+            <button class="add-paper-btn" onclick="showAddPaperModal()">+ 添加论文</button>
+            <ul class="paper-list" id="paper-list">
+                <!-- 论文列表将动态加载 -->
+            </ul>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- PDF 阅读器 -->
+            <div class="pdf-container">
+                <div class="pdf-toolbar">
+                    <div>
+                        <span id="current-paper-title">未选择论文</span>
+                    </div>
+                    <div>
+                        <input type="file" id="local-pdf" accept="application/pdf">
+                        <button class="toolbar-btn" onclick="document.getElementById('local-pdf').click()">
+                            📁 打开本地 PDF
+                        </button>
+                        <button class="toolbar-btn" onclick="openUrlPdf()">
+                            🔗 打开 URL PDF
+                        </button>
+                    </div>
+                </div>
+                <iframe id="pdf-viewer" src=""></iframe>
+            </div>
+
+            <!-- 笔记区域 -->
+            <div class="notes-container">
+                <div class="notes-header">
+                    <h3>📝 笔记</h3>
+                </div>
+                <div class="notes-content" id="notes-content">
+                    <div class="empty-state">
+                        <p>请先选择或添加一篇论文</p>
+                    </div>
+                </div>
+                <div class="add-note-section" id="add-note-section" style="display: none;">
+                    <textarea class="note-input" id="note-input" placeholder="在此记录您的笔记..."></textarea>
+                    <input type="number" id="page-number" placeholder="页码 (可选)" min="1" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                    <button class="save-note-btn" onclick="addNote()">💾 保存笔记</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加论文明态框 -->
+    <div id="add-paper-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddPaperModal()">&times;</span>
+            <h2 style="margin-bottom: 20px;">添加新论文</h2>
+            <div class="form-group">
+                <label>论文标题</label>
+                <input type="text" id="paper-title-input" placeholder="输入论文标题">
+            </div>
+            <div class="form-group">
+                <label>文件来源</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="file-type" value="local" checked onchange="toggleFileInput()"> 本地文件
+                    </label>
+                    <label>
+                        <input type="radio" name="file-type" value="url" onchange="toggleFileInput()"> URL 链接
+                    </label>
+                </div>
+            </div>
+            <div class="form-group" id="local-file-group">
+                <label>选择 PDF 文件</label>
+                <input type="file" id="modal-local-file" accept="application/pdf">
+            </div>
+            <div class="form-group" id="url-file-group" style="display: none;">
+                <label>PDF URL 地址</label>
+                <input type="url" id="modal-url-input" placeholder="https://example.com/paper.pdf">
+            </div>
+            <button class="submit-btn" onclick="submitPaper()">创建论文记录</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        let currentPaperId = null;
+
+        // 页面加载时获取论文列表
+        document.addEventListener('DOMContentLoaded', loadPapers);
+
+        // 加载论文列表
+        async function loadPapers() {
+            try {
+                const response = await fetch('/api/papers');
+                const papers = await response.json();
+                renderPaperList(papers);
+            } catch (error) {
+                console.error('加载论文列表失败:', error);
+            }
+        }
+
+        // 渲染论文列表
+        function renderPaperList(papers) {
+            const paperList = document.getElementById('paper-list');
+            if (papers.length === 0) {
+                paperList.innerHTML = '<li class="empty-state"><p>暂无论文记录</p></li>';
+                return;
+            }
+
+            paperList.innerHTML = papers.map(paper => `
+                <li class="paper-item" data-id="${paper.id}" onclick="selectPaper(${paper.id})">
+                    <div class="paper-title">${paper.title}</div>
+                    <div class="paper-meta">
+                        ${paper.file_type === 'local' ? '📁' : '🔗'} 
+                        ${paper.created_at} · ${paper.notes_count} 条笔记
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // 选择论文
+        async function selectPaper(paperId) {
+            try {
+                const response = await fetch(`/api/papers/${paperId}`);
+                const paper = await response.json();
+                
+                currentPaperId = paperId;
+                
+                // 更新侧边栏激活状态
+                document.querySelectorAll('.paper-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.id == paperId) {
+                        item.classList.add('active');
+                    }
+                });
+
+                // 显示标题
+                document.getElementById('current-paper-title').textContent = paper.title;
+
+                // 加载 PDF
+                loadPdf(paper.file_path, paper.file_type);
+
+                // 加载笔记
+                renderNotes(paper.notes);
+
+                // 显示笔记输入区
+                document.getElementById('add-note-section').style.display = 'block';
+
+            } catch (error) {
+                console.error('加载论文详情失败:', error);
+                alert('加载论文详情失败');
+            }
+        }
+
+        // 加载 PDF
+        function loadPdf(fileSource, fileType) {
+            const pdfViewer = document.getElementById('pdf-viewer');
+            
+            if (fileType === 'url') {
+                pdfViewer.src = fileSource;
+            } else {
+                // 本地文件通过 uploads 路由访问
+                pdfViewer.src = `/uploads/${encodeURIComponent(fileSource)}`;
+            }
+        }
+
+        // 渲染笔记
+        function renderNotes(notes) {
+            const notesContent = document.getElementById('notes-content');
+            
+            if (notes.length === 0) {
+                notesContent.innerHTML = '<div class="empty-state"><p>暂无笔记</p></div>';
+                return;
+            }
+
+            notesContent.innerHTML = notes.map(note => `
+                <div class="note-item">
+                    <div class="note-page">📄 第 ${note.page_number} 页 · ${note.created_at}</div>
+                    <div class="note-text">${escapeHtml(note.content)}</div>
+                    <div class="note-actions">
+                        <button class="note-btn edit-btn" onclick="editNote(${note.id}, '${escapeHtml(note.content)}')">✏️ 编辑</button>
+                        <button class="note-btn delete-btn" onclick="deleteNote(${note.id})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 显示添加论文明态框
+        function showAddPaperModal() {
+            document.getElementById('add-paper-modal').style.display = 'block';
+        }
+
+        // 关闭添加论文明态框
+        function closeAddPaperModal() {
+            document.getElementById('add-paper-modal').style.display = 'none';
+            clearModalInputs();
+        }
+
+        // 清空模态框输入
+        function clearModalInputs() {
+            document.getElementById('paper-title-input').value = '';
+            document.getElementById('modal-local-file').value = '';
+            document.getElementById('modal-url-input').value = '';
+        }
+
+        // 切换文件输入类型
+        function toggleFileInput() {
+            const fileType = document.querySelector('input[name="file-type"]:checked').value;
+            document.getElementById('local-file-group').style.display = fileType === 'local' ? 'block' : 'none';
+            document.getElementById('url-file-group').style.display = fileType === 'url' ? 'block' : 'none';
+        }
+
+        // 提交论文
+        async function submitPaper() {
+            const title = document.getElementById('paper-title-input').value.trim();
+            const fileType = document.querySelector('input[name="file-type"]:checked').value;
+            
+            if (!title) {
+                alert('请输入论文标题');
+                return;
+            }
+
+            let filePath;
+            if (fileType === 'local') {
+                const fileInput = document.getElementById('modal-local-file');
+                if (!fileInput.files[0]) {
+                    alert('请选择 PDF 文件');
+                    return;
+                }
+                // 这里需要上传文件到服务器
+                filePath = await uploadFile(fileInput.files[0]);
+            } else {
+                filePath = document.getElementById('modal-url-input').value.trim();
+                if (!filePath) {
+                    alert('请输入 PDF URL');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/papers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        file_path: filePath,
+                        file_type: fileType
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('论文记录创建成功!');
+                    closeAddPaperModal();
+                    loadPapers();
+                    selectPaper(result.id);
+                } else {
+                    const error = await response.json();
+                    alert(error.error || '创建失败');
+                }
+            } catch (error) {
+                console.error('创建论文记录失败:', error);
+                alert('创建失败，请重试');
+            }
+        }
+
+        // 上传文件
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.filename;
+                } else {
+                    throw new Error('上传失败');
+                }
+            } catch (error) {
+                console.error('文件上传失败:', error);
+                alert('文件上传失败');
+                throw error;
+            }
+        }
+
+        // 打开本地 PDF
+        document.getElementById('local-pdf').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const title = prompt('请输入论文标题:', file.name.replace('.pdf', ''));
+            if (!title) return;
+
+            const filePath = await uploadFile(file);
+            
+            try {
+                const response = await fetch('/api/papers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        file_path: filePath,
+                        file_type: 'local'
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    loadPapers();
+                    selectPaper(result.id);
+                }
+            } catch (error) {
+                console.error('创建论文记录失败:', error);
+            }
+        });
+
+        // 打开 URL PDF
+        function openUrlPdf() {
+            const url = prompt('请输入 PDF 的 URL 地址:');
+            if (!url) return;
+
+            const title = prompt('请输入论文标题:');
+            if (!title) return;
+
+            createPaperFromUrl(title, url);
+        }
+
+        // 从 URL 创建论文记录
+        async function createPaperFromUrl(title, url) {
+            try {
+                const response = await fetch('/api/papers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        file_path: url,
+                        file_type: 'url'
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    loadPapers();
+                    selectPaper(result.id);
+                } else {
+                    const error = await response.json();
+                    alert(error.error || '创建失败');
+                }
+            } catch (error) {
+                console.error('创建论文记录失败:', error);
+                alert('创建失败，请重试');
+            }
+        }
+
+        // 添加笔记
+        async function addNote() {
+            const content = document.getElementById('note-input').value.trim();
+            const pageNumber = document.getElementById('page-number').value || 1;
+
+            if (!content) {
+                alert('请输入笔记内容');
+                return;
+            }
+
+            if (!currentPaperId) {
+                alert('请先选择论文');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/papers/${currentPaperId}/notes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        page_number: parseInt(pageNumber)
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('note-input').value = '';
+                    document.getElementById('page-number').value = '';
+                    loadPaperNotes(currentPaperId);
+                } else {
+                    const error = await response.json();
+                    alert(error.error || '添加失败');
+                }
+            } catch (error) {
+                console.error('添加笔记失败:', error);
+                alert('添加失败，请重试');
+            }
+        }
+
+        // 重新加载论文笔记
+        async function loadPaperNotes(paperId) {
+            const response = await fetch(`/api/papers/${paperId}`);
+            const paper = await response.json();
+            renderNotes(paper.notes);
+            loadPapers(); // 更新侧边栏的笔记数量
+        }
+
+        // 编辑笔记
+        async function editNote(noteId, currentContent) {
+            const newContent = prompt('编辑笔记:', currentContent);
+            if (newContent === null) return;
+
+            try {
+                const response = await fetch(`/api/notes/${noteId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: newContent
+                    })
+                });
+
+                if (response.ok) {
+                    loadPaperNotes(currentPaperId);
+                } else {
+                    alert('编辑失败');
+                }
+            } catch (error) {
+                console.error('编辑笔记失败:', error);
+                alert('编辑失败，请重试');
+            }
+        }
+
+        // 删除笔记
+        async function deleteNote(noteId) {
+            if (!confirm('确定要删除这条笔记吗？')) return;
+
+            try {
+                const response = await fetch(`/api/notes/${noteId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadPaperNotes(currentPaperId);
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                console.error('删除笔记失败:', error);
+                alert('删除失败，请重试');
+            }
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('add-paper-modal');
+            if (event.target === modal) {
+                closeAddPaperModal();
+            }
+        }
+    </script>
+</body>
+</html>
