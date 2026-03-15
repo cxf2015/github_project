@@ -31,6 +31,40 @@
             overflow-y: auto;
             padding: 20px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.hidden {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        /* 切换按钮 */
+        .toggle-sidebar-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-sidebar-btn:hover {
+            background-color: #2980b9;
+            transform: translateX(2px);
+        }
+
+        .toggle-sidebar-btn.hidden {
+            left: 20px;
         }
 
         .sidebar h2 {
@@ -330,13 +364,18 @@
 <body>
     <div class="container">
         <!-- 侧边栏 -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <h2>📚 Paper Logger</h2>
             <button class="add-paper-btn" onclick="showAddPaperModal()">+ 添加论文</button>
             <ul class="paper-list" id="paper-list">
                 <!-- 论文列表将动态加载 -->
             </ul>
         </div>
+
+        <!-- 切换侧边栏按钮 -->
+        <button class="toggle-sidebar-btn" id="toggle-sidebar-btn" onclick="toggleSidebar()" title="切换文档列表">
+            ☰
+        </button>
 
         <!-- 主内容区 -->
         <div class="main-content">
@@ -792,6 +831,22 @@
             } catch (error) {
                 console.error('删除笔记失败:', error);
                 alert('删除失败，请重试');
+            }
+        }
+
+        // 切换侧边栏
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggle-sidebar-btn');
+
+            if (sidebar.classList.contains('hidden')) {
+                sidebar.classList.remove('hidden');
+                toggleBtn.innerHTML = '☰';
+                toggleBtn.title = '切换文档列表';
+            } else {
+                sidebar.classList.add('hidden');
+                toggleBtn.innerHTML = '➤';
+                toggleBtn.title = '显示文档列表';
             }
         }
 
