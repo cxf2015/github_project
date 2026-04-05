@@ -96,7 +96,7 @@ def test_api():
     # 7. 更新笔记
     print(f"\n7. 更新第一条笔记...")
     update_data = {
-        'content': '[已更新] 这是一篇 Transformer的开创性论文，提出了自注意力机制。非常重要！'
+        'content': '[已更新] 这是一篇 Transformer 的开创性论文，提出了自注意力机制。非常重要！'
     }
     response = requests.put(f'{BASE_URL}/api/notes/{note_id}', json=update_data)
     if response.status_code == 200:
@@ -115,8 +115,27 @@ def test_api():
     else:
         print(f"✗ 失败：{response.status_code}")
     
-    # 9. 删除测试数据
-    print(f"\n9. 清理测试数据...")
+    # 9. 测试翻译功能
+    print(f"\n9. 测试翻译功能 (多引擎)...")
+    
+    test_text = "This is a test sentence for translation."
+    engines = ['baidu', 'google']  # 只测试百度和 Google
+    
+    for engine in engines:
+        print(f"\n  测试 {engine} 翻译:")
+        response = requests.post(f'{BASE_URL}/api/translate', 
+                                json={'text': test_text, 'engine': engine})
+        if response.status_code == 200:
+            result = response.json()
+            print(f"    ✓ {result.get('engine_name', engine)}:")
+            print(f"      原文：{result['original']}")
+            print(f"      译文：{result['translated'][:50]}...")
+        else:
+            error = response.json()
+            print(f"    ⚠️ {engine} 翻译失败：{error.get('error', '未知错误')}")
+    
+    # 10. 删除测试数据
+    print(f"\n10. 清理测试数据...")
     response = requests.delete(f'{BASE_URL}/api/papers/{paper_id}')
     if response.status_code == 200:
         print(f"✓ 成功删除测试论文记录")
@@ -127,6 +146,7 @@ def test_api():
     print("✓ 所有测试完成!")
     print("=" * 60)
     print("\n提示：请在浏览器中访问 http://localhost:5000 查看实际界面")
+    print("翻译功能配置说明请查看 TRANSLATION_SETUP.md 文档")
 
 if __name__ == '__main__':
     try:

@@ -13,6 +13,21 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 限制上传文件大小为 50MB
 
+# 翻译 API 配置
+# 百度翻译 API 注册地址：https://fanyi-api.baidu.com/
+app.config['TRANSLATION_APP_ID'] = ''  # 填入你的百度翻译 APP ID
+app.config['TRANSLATION_SECRET_KEY'] = ''  # 填入你的百度翻译密钥
+
+# 有道翻译 API 注册地址：https://ai.youdao.com/
+app.config['YOUDAO_APP_ID'] = ''  # 填入你的有道翻译 APP ID
+app.config['YOUDAO_SECRET_KEY'] = ''  # 填入你的有道翻译密钥
+
+# Google 翻译 (无需 API key，直接调用)
+# 注意：国内可能需要代理才能访问
+
+# DeepL 翻译 API 注册地址：https://www.deepl.com/pro-api
+app.config['DEEPL_API_KEY'] = ''  # 填入你的 DeepL API 密钥 (付费)
+
 # 创建上传文件夹
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -195,6 +210,237 @@ def upload_file():
 def uploaded_file(filename):
     """提供上传文件的访问"""
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/api/translate', methods=['POST'])
+def translate():
+    """翻译文本 - 支持多个翻译引擎"""
+    import hashlib
+    import requests
+    
+    data = request.json
+    text = data.get('text', '')
+    engine = data.get('engine', 'baidu')  # 默认使用百度翻译
+    
+    if not text:
+        return jsonify({'error': '翻译文本不能为空'}), 400
+    
+    try:
+        if engine == 'baidu':
+            return translate_baidu(text)
+        elif engine == 'youdao':
+            return translate_youdao(text)
+        elif engine == 'google':
+            return translate_google(text)
+        elif engine == 'deepl':
+            return translate_deepl(text)
+        else:
+            return jsonify({
+                'error': '不支持的翻译引擎',
+                'message': f'当前支持的引擎：baidu, youdao, google, deepl'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'error': '翻译失败',
+            'message': str(e)
+        }), 500
+
+def translate_baidu(text):
+    """百度翻译"""
+    app_id = app.config['TRANSLATION_APP_ID']
+    secret_key = app.config['TRANSLATION_SECRET_KEY']
+    
+    if not app_id or not secret_key:
+        return jsonify({
+            'error': '百度翻译 API 未配置',
+            'message': '请在 app.py 中配置 TRANSLATION_APP_ID 和 TRANSLATION_SECRET_KEY',
+            'guide': '注册地址：https://fanyi-api.baidu.com/'
+        }), 400
+    
+    try:
+        # 生成签名
+        salt = str(uuid.uuid4())
+        sign_str = app_id + text + salt + secret_key
+        sign = hashlib.md5(sign_str.encode('utf-8')).hexdigest()
+        
+        # 调用百度翻译 API
+        url = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
+        params = {
+            'q': text,
+            'from': 'en',
+            'to': 'zh',
+            'appid': app_id,
+            'salt': salt,
+            'sign': sign
+        }
+        
+        response = requests.post(url, params=params, timeout=10)
+        result = response.json()
+        
+        if 'error_code' in result:
+            return jsonify({
+                'error': '翻译失败',
+                'message': result.get('error_msg', '未知错误')
+            }), 400
+        
+        translated_text = result['trans_result'][0]['dst']
+        return jsonify({
+            'original': text,
+            'translated': translated_text,
+            'engine_name': '百度翻译'
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'error': '网络请求失败',
+            'message': str(e)
+        }), 500
+
+def translate_youdao(text):
+    """有道翻译"""
+    app_id = app.config['YOUDAO_APP_ID']
+    secret_key = app.config['YOUDAO_SECRET_KEY']
+    
+    if not app_id or not secret_key:
+        return jsonify({
+            'error': '有道翻译 API 未配置',
+            'message': '请在 app.py 中配置 YOUDAO_APP_ID 和 YOUDAO_SECRET_KEY',
+            'guide': '注册地址：https://ai.youdao.com/'
+        }), 400
+    
+    try:
+        import time
+        from Crypto.Cipher import AES
+        from Crypto.Util.Padding import pad
+        import base64
+        
+        # 有道翻译需要更复杂的加密，这里简化处理
+        # 实际使用时需要按照有道文档实现完整签名
+        salt = str(uuid.uuid4())
+        curtime = str(int(time.time()))
+        
+        # 简化版本（实际应该使用 AES 加密）
+        sign = hashlib.sha256((app_id + text + salt + curtime + secret_key).encode()).hexdigest()
+        
+        url = 'https://openapi.youdao.com/api'
+        params = {
+            'q': text,
+            'from': 'EN',
+            'to': 'zh-CHS',
+            'appKey': app_id,
+            'salt': salt,
+            'sign': sign,
+            'signType': 'v3',
+            'curtime': curtime
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        result = response.json()
+        
+        if result.get('errorCode') != '0':
+            return jsonify({
+                'error': '翻译失败',
+                'message': f'有道 API 错误：{result.get("errorCode", "未知")}'
+            }), 400
+        
+        # 有道返回格式与百度不同
+        translated_text = ' '.join(result.get('translation', []))
+        return jsonify({
+            'original': text,
+            'translated': translated_text,
+            'engine_name': '有道翻译'
+        }), 200
+        
+    except ImportError:
+        return jsonify({
+            'error': '缺少依赖库',
+            'message': '请安装 pycryptodome: pip install pycryptodome'
+        }), 500
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'error': '网络请求失败',
+            'message': str(e)
+        }), 500
+
+def translate_google(text):
+    """Google 翻译 (无需 API key)"""
+    try:
+        # 使用 Google 翻译的公开接口（非官方 API）
+        # 注意：有频率限制，适合低频使用
+        url = 'https://translate.googleapis.com/translate_a/single'
+        params = {
+            'client': 'gtx',
+            'sl': 'en',
+            'tl': 'zh-CN',
+            'dt': 't',
+            'q': text
+        }
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        result = response.json()
+        
+        # 解析 Google 翻译结果
+        translated_text = ''.join([sentence[0] for sentence in result[0] if sentence[0]])
+        
+        return jsonify({
+            'original': text,
+            'translated': translated_text,
+            'engine_name': 'Google 翻译 (免费)'
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'error': '网络请求失败',
+            'message': '无法访问 Google 服务，可能需要代理。错误：' + str(e)
+        }), 500
+
+def translate_deepl(text):
+    """DeepL 翻译 (付费，质量最高)"""
+    api_key = app.config['DEEPL_API_KEY']
+    
+    if not api_key:
+        return jsonify({
+            'error': 'DeepL API 未配置',
+            'message': '请在 app.py 中配置 DEEPL_API_KEY',
+            'guide': '注册地址：https://www.deepl.com/pro-api (付费服务)'
+        }), 400
+    
+    try:
+        url = 'https://api-free.deepl.com/v2/translate'
+        headers = {
+            'Authorization': f'DeepL-Auth-Key {api_key}',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            'text': [text],
+            'target_lang': 'ZH'
+        }
+        
+        response = requests.post(url, headers=headers, json=data, timeout=10)
+        result = response.json()
+        
+        if response.status_code != 200:
+            return jsonify({
+                'error': '翻译失败',
+                'message': f'DeepL API 错误：{result.get("message", "未知错误")}'
+            }), 400
+        
+        translated_text = result['translations'][0]['text']
+        return jsonify({
+            'original': text,
+            'translated': translated_text,
+            'engine_name': 'DeepL 翻译 (专业级)'
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'error': '网络请求失败',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

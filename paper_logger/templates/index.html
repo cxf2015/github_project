@@ -175,100 +175,351 @@
         /* 笔记区域 */
         .notes-container {
             width: 400px;
-            background-color: white;
-            border-left: 1px solid #bdc3c7;
+            background-color: #ffffff;
+            border-left: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.05);
         }
 
         .notes-header {
-            padding: 20px;
-            background-color: #34495e;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notes-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .notes-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .notes-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
 
         .notes-content {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .notes-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .notes-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .notes-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .notes-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         .note-item {
-            background-color: #f8f9fa;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 3px;
+            background: linear-gradient(to bottom, #ffffff, #f8f9ff);
+            border-left: 4px solid #667eea;
+            padding: 18px;
+            margin-bottom: 18px;
+            border-radius: 8px;
             position: relative;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .note-item:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
         }
 
         .note-page {
             font-size: 12px;
-            color: #7f8c8d;
-            margin-bottom: 8px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-page::before {
+            content: '📄';
+            font-size: 14px;
         }
 
         .note-text {
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
+            color: #2c3e50;
             white-space: pre-wrap;
+            background-color: rgba(255,255,255,0.5);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #e9ecef;
         }
 
         .note-actions {
-            margin-top: 10px;
-            text-align: right;
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
         }
 
         .note-btn {
-            padding: 5px 10px;
+            padding: 6px 12px;
             margin-left: 5px;
             border: none;
-            border-radius: 3px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(245, 87, 108, 0.3);
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(245, 87, 108, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(250, 112, 154, 0.3);
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(250, 112, 154, 0.4);
+        }
+
+        .add-note-section {
+            padding: 25px 20px;
+            border-top: 2px solid #e9ecef;
+            background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 翻译面板 */
+        .translation-panel {
+            width: 50%;
+            background-color: #ffffff;
+            border-left: 2px solid #667eea;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.08);
+        }
+
+        .translation-panel.hidden {
+            display: none;
+        }
+
+        .translation-toolbar {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .translation-toolbar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -15%;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .translation-toolbar h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .close-translation-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .close-translation-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .translation-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background-color: #f8f9fa;
+        }
+
+        .translation-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .translation-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .translation-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .translation-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .translation-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #2c3e50;
+            white-space: pre-wrap;
+        }
+
+        .translation-text > div {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .translation-text > div:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .translation-loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .translation-loading::before {
+            content: '⏳';
+            font-size: 40px;
+            display: block;
+            margin-bottom: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .translation-error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #dc3545;
+            font-size: 15px;
+            background-color: #fff5f5;
+            border-radius: 8px;
+            border: 1px solid #ffe3e3;
+        }
+
+        .translation-error::before {
+            content: '❌';
+            font-size: 40px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .close-translation-btn {
+            padding: 5px 12px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
         }
 
-        .edit-btn {
-            background-color: #f39c12;
-            color: white;
+        .close-translation-btn:hover {
+            background-color: #c0392b;
         }
 
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
+        /* 分屏模式 */
+        .split-view .pdf-container {
+            width: 50%;
         }
 
-        .add-note-section {
-            padding: 20px;
-            border-top: 1px solid #bdc3c7;
-            background-color: #f8f9fa;
-        }
-
-        .note-input {
-            width: 100%;
-            min-height: 100px;
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            resize: vertical;
-            font-family: inherit;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .save-note-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .save-note-btn:hover {
-            background-color: #229954;
+        .split-view .main-content {
+            display: flex;
         }
 
         /* 模态框 */
@@ -352,12 +603,70 @@
 
         .empty-state {
             text-align: center;
-            padding: 50px 20px;
-            color: #95a5a6;
+            padding: 60px 20px;
+            color: #adb5bd;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            margin: 20px;
         }
 
         .empty-state p {
-            font-size: 18px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state::before {
+            content: '📝';
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+            line-height: 1.6;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: #ffffff;
+        }
+
+        .save-note-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .save-note-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-note-btn:active {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -393,9 +702,28 @@
                         <button class="toolbar-btn" onclick="openUrlPdf()">
                             🔗 打开 URL PDF
                         </button>
+                        <button class="toolbar-btn" onclick="toggleTranslation()" title="中英文对照翻译">
+                            🈯️ 翻译
+                        </button>
                     </div>
                 </div>
                 <iframe id="pdf-viewer" src=""></iframe>
+            </div>
+
+            <!-- 翻译面板 -->
+            <div class="translation-panel hidden" id="translation-panel">
+                <div class="translation-toolbar">
+                    <h3>📖 智能翻译</h3>
+                    <button class="close-translation-btn" onclick="toggleTranslation()">关闭</button>
+                </div>
+                <div class="translation-content" id="translation-content">
+                    <div class="empty-state">
+                        <p>请选择翻译服务并输入要翻译的文本</p>
+                        <p style="font-size: 14px; margin-top: 10px; color: #95a5a6;">
+                            💡 提示：下方支持多种翻译引擎，可切换使用
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- 笔记区域 -->
@@ -412,6 +740,40 @@
                     <textarea class="note-input" id="note-input" placeholder="在此记录您的笔记..."></textarea>
                     <input type="number" id="page-number" placeholder="页码 (可选)" min="1" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #bdc3c7; border-radius: 4px;">
                     <button class="save-note-btn" onclick="addNote()">💾 保存笔记</button>
+                    
+                    <!-- 翻译输入区域 -->
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 2px dashed #dee2e6;">
+                        <h4 style="margin-bottom: 15px; color: #667eea; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">🌐</span> 多引擎翻译
+                        </h4>
+                        
+                        <!-- 翻译引擎选择 -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">
+                                🤖 选择翻译引擎:
+                            </label>
+                            <select id="translation-engine" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; background-color: white; cursor: pointer;" onchange="updateEngineDescription()">
+                                <option value="baidu">百度翻译 (推荐)</option>
+                                <option value="youdao">有道翻译</option>
+                                <option value="google">Google 翻译</option>
+                                <option value="deepl">DeepL 翻译 (最准确)</option>
+                            </select>
+                            <p id="engine-description" style="font-size: 12px; color: #6c757d; margin-top: 8px; margin-left: 4px;">
+                                ✅ 百度翻译：稳定可靠，适合学术文献翻译
+                            </p>
+                        </div>
+                        
+                        <textarea class="note-input" id="translation-input" placeholder="输入要翻译的英文文本，支持单词、句子或段落..." style="min-height: 100px; border-color: #667eea;"></textarea>
+                        
+                        <button class="save-note-btn" onclick="translateText()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 10px; position: relative;">
+                            🈯️ 立即翻译
+                        </button>
+                        
+                        <!-- API 配置提示 -->
+                        <div id="api-config-hint" style="margin-top: 15px; padding: 12px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px; font-size: 13px;">
+                            ⚠️ 部分翻译引擎需要配置 API 密钥，请确保已在 app.py 中配置相应参数
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -847,6 +1209,112 @@
                 sidebar.classList.add('hidden');
                 toggleBtn.innerHTML = '➤';
                 toggleBtn.title = '显示文档列表';
+            }
+        }
+
+        // 切换翻译面板
+        function toggleTranslation() {
+            const translationPanel = document.getElementById('translation-panel');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (translationPanel.classList.contains('hidden')) {
+                translationPanel.classList.remove('hidden');
+                mainContent.classList.add('split-view');
+            } else {
+                translationPanel.classList.add('hidden');
+                mainContent.classList.remove('split-view');
+            }
+        }
+
+        // 更新引擎描述
+        function updateEngineDescription() {
+            const engine = document.getElementById('translation-engine').value;
+            const descriptions = {
+                'baidu': '✅ 百度翻译：稳定可靠，适合学术文献翻译',
+                'youdao': '✅ 有道翻译：中英文翻译准确，支持多种语言',
+                'google': '✅ Google 翻译：全球使用最广泛的翻译服务',
+                'deepl': '⭐ DeepL 翻译：准确度最高，但需要付费 API'
+            };
+            document.getElementById('engine-description').textContent = descriptions[engine];
+            
+            // 更新配置提示
+            const hintDiv = document.getElementById('api-config-hint');
+            if (engine === 'deepl') {
+                hintDiv.style.display = 'block';
+                hintDiv.innerHTML = '⚠️ DeepL 需要付费 API 密钥，请确保已购买并配置 DEEPL_API_KEY';
+            } else {
+                hintDiv.style.display = 'block';
+                hintDiv.innerHTML = '⚠️ 部分翻译引擎需要配置 API 密钥，请确保已在 app.py 中配置相应参数';
+            }
+        }
+
+        // 翻译文本
+        async function translateText() {
+            const text = document.getElementById('translation-input').value.trim();
+            const translationContent = document.getElementById('translation-content');
+            const engine = document.getElementById('translation-engine').value;
+            
+            if (!text) {
+                alert('请输入要翻译的文本');
+                return;
+            }
+
+            // 显示加载状态
+            translationContent.innerHTML = '<div class="translation-loading">正在翻译中...</div>';
+
+            try {
+                // 调用后端翻译 API，传递选择的引擎
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        engine: engine
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || result.message || '翻译失败');
+                }
+                
+                // 显示翻译结果
+                const translatedText = result.translated;
+                const engineName = result.engine_name || '翻译';
+                
+                translationContent.innerHTML = `
+                    <div class="translation-text">
+                        <div style="margin-bottom: 10px; padding: 10px; background-color: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px;">
+                            <strong style="color: #1976d2;">🤖 使用引擎：</strong>${engineName}
+                        </div>
+                        <div style="margin-bottom: 20px; padding: 15px; background-color: #ecf0f1; border-left: 4px solid #3498db; border-radius: 6px;">
+                            <strong>📄 原文:</strong><br>
+                            ${escapeHtml(text)}
+                        </div>
+                        <div style="padding: 15px; background-color: #e8f6f3; border-left: 4px solid #27ae60; border-radius: 6px;">
+                            <strong>✅ 译文:</strong><br>
+                            ${escapeHtml(translatedText)}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('翻译失败:', error);
+                translationContent.innerHTML = `
+                    <div class="translation-error">
+                        <p>❌ 翻译失败</p>
+                        <p style="font-size: 13px; margin-top: 10px;">${error.message}</p>
+                        ${error.message.includes('未配置') ? `
+                            <p style="font-size: 13px; margin-top: 15px;">
+                                💡 请在 app.py 中配置相应的翻译 API 密钥<br>
+                                详细配置说明请查看 TRANSLATION_SETUP.md
+                            </p>
+                        ` : ''}
+                    </div>
+                `;
             }
         }
 
